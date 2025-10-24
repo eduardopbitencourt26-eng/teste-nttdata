@@ -170,7 +170,7 @@
     }
   ],
   "variable": [
-    { "key": "BASE", "value": "http://localhost" },
+    { "key": "BASE", "value": "https://sistema-votacao.lndo.site" },
     { "key": "API_KEY", "value": "" },
     { "key": "USERNAME", "value": "" },
     { "key": "PASSWORD", "value": "" },
