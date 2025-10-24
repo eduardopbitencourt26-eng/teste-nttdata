@@ -1,0 +1,173 @@
+entity.poll_vote.collection:
+  path: '/admin/content/polls/votes'
+  defaults:
+    _entity_list: 'poll_vote'
+    _title: 'Poll votes'
+  requirements:
+    _permission: 'administer poll system'
+entity.poll_question.collection:
+  path: '/admin/content/polls'
+  defaults:
+    _entity_list: 'poll_question'
+    _title: 'Poll questions'
+  requirements:
+    _permission: 'administer poll system'
+
+entity.poll_question.add_form:
+  path: '/admin/content/polls/add'
+  defaults:
+    _entity_form: 'poll_question.add'
+    _title: 'Add poll question'
+  requirements:
+    _permission: 'administer poll system'
+
+entity.poll_question.edit_form:
+  path: '/admin/content/polls/{poll_question}/edit'
+  defaults:
+    _entity_form: 'poll_question.edit'
+    _title: 'Edit poll question'
+  requirements:
+    _permission: 'administer poll system'
+
+entity.poll_question.delete_form:
+  path: '/admin/content/polls/{poll_question}/delete'
+  defaults:
+    _entity_form: 'poll_question.delete'
+    _title: 'Delete poll question'
+  requirements:
+    _permission: 'administer poll system'
+
+entity.poll_option.collection:
+  path: '/admin/content/polls/{poll_question}/options'
+  defaults:
+    _controller: '\Drupal\poll_system\Controller\OptionAdminController::list'
+    _title: 'Options'
+  requirements:
+    _permission: 'administer poll system'
+
+entity.poll_option.add_form:
+  path: '/admin/content/polls/{poll_question}/options/add'
+  defaults:
+    _entity_form: 'poll_option.add'
+    _title: 'Add option'
+  requirements:
+    _permission: 'administer poll system'
+
+entity.poll_option.edit_form:
+  path: '/admin/content/polls/options/{poll_option}/edit'
+  defaults:
+    _entity_form: 'poll_option.edit'
+    _title: 'Edit option'
+  requirements:
+    _permission: 'administer poll system'
+
+entity.poll_option.delete_form:
+  path: '/admin/content/polls/options/{poll_option}/delete'
+  defaults:
+    _entity_form: 'poll_option.delete'
+    _title: 'Delete option'
+  requirements:
+    _permission: 'administer poll system'
+
+poll_system.options_overview:
+  path: '/admin/content/polls/options'
+  defaults:
+    _controller: '\Drupal\poll_system\Controller\OptionAdminController::overview'
+    _title: 'Options'
+  requirements:
+    _permission: 'administer poll system'
+
+poll_system.vote_list:
+  path: '/polls'
+  defaults:
+    _controller: '\Drupal\poll_system\Controller\VoteListController::list'
+    _title: 'Polls'
+  requirements:
+    _permission: 'access content'
+
+poll_system.vote_ui:
+  path: '/poll/{poll_question}'
+  defaults:
+    _controller: '\Drupal\poll_system\Controller\VoteUiController::view'
+  requirements:
+    _permission: 'vote on polls'
+  options:
+    parameters:
+      poll_question:
+        type: entity:poll_question
+
+poll_system.vote_submit:
+  path: '/poll/{poll_question}/vote'
+  methods: [POST]
+  defaults:
+    _controller: '\Drupal\poll_system\Controller\VoteUiController::submit'
+  requirements:
+    _permission: 'vote on polls'
+  options:
+    parameters:
+      poll_question:
+        type: entity:poll_question
+
+# Settings form
+poll_system.settings:
+  path: '/admin/config/system/poll-system'
+  defaults:
+    _form: '\Drupal\poll_system\Form\SettingsForm'
+    _title: 'Poll System settings'
+  requirements:
+    _permission: 'administer poll system'
+
+# API (manual JSON endpoints)
+poll_system.api.login:
+  path: '/api/login'
+  methods: [POST]
+  defaults:
+    _controller: '\Drupal\poll_system\Controller\ApiController::login'
+  requirements:
+    _permission: 'access content'   # permitir anonymous logar
+
+poll_system.api.logout:
+  path: '/api/logout'
+  methods: [POST]
+  defaults:
+    _controller: '\Drupal\poll_system\Controller\ApiController::logout'
+  requirements:
+    _permission: 'access content'
+
+
+poll_system.api.questions:
+  path: '/api/poll/questions'
+  defaults:
+    _controller: '\Drupal\poll_system\Controller\ApiController::listQuestions'
+  requirements:
+    _permission: 'access poll api'
+  options:
+    _format: 'json'
+
+poll_system.api.question.get:
+  path: '/api/poll/questions/{question_id}'
+  defaults:
+    _controller: '\Drupal\poll_system\Controller\ApiController::getQuestion'
+  requirements:
+    _permission: 'access poll api'
+  options:
+    _format: 'json'
+
+poll_system.api.vote:
+  path: '/api/poll/questions/{question_id}/vote'
+  methods: [POST]
+  defaults:
+    _controller: '\Drupal\poll_system\Controller\ApiController::postVote'
+  requirements:
+    _permission: 'access content'
+  options:
+    _format: 'json'
+
+poll_system.api.results:
+  path: '/api/poll/questions/{question_id}/results'
+  defaults:
+    _controller: '\Drupal\poll_system\Controller\ApiController::getResults'
+  requirements:
+    _permission: 'access poll api'
+  options:
+    _format: 'json'

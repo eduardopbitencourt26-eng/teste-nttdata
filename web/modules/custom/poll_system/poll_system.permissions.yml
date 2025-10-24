@@ -1,0 +1,15 @@
+administer poll system:
+  title: 'Administer Poll System (questions, options, settings)'
+  description: 'Create, edit, delete questions/options and access settings.'
+
+vote on polls:
+  title: 'Vote on polls'
+  description: 'Allow users to submit a vote via CMS UI.'
+
+access poll api:
+  title: 'Access Poll System API (Read)'
+  description: 'Can call poll API GET endpoints.'
+
+vote via poll api:
+  title: 'Vote via Poll API (Write)'
+  description: 'Can call poll API POST [vote].'

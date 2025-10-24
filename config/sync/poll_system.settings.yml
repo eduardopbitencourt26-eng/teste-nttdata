@@ -1,0 +1,4 @@
+voting_enabled: true
+show_totals_default: true
+api_key: minha-api-key
+require_auth: false

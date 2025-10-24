@@ -1,0 +1,5 @@
+voting_enabled: 1
+max_votes_per_user: '1'
+vote_timeout: '60'
+enable_ip_tracking: 1
+require_user_registration: 0

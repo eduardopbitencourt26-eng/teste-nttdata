@@ -1,0 +1,3 @@
+allow_multiple_votes: false
+require_user_login: true
+max_votes_per_user: 1

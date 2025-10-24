@@ -1,0 +1,30 @@
+poll_system.admin:
+  title: 'Polls'
+  description: 'Manage poll questions and options'
+  parent: system.admin_content
+  route_name: entity.poll_question.collection
+  weight: 10
+poll_system.admin.options:
+  title: 'Options'
+  description: 'Manage options grouped by question'
+  parent: poll_system.admin          # 👈 vira dropdown sob “Polls”
+  route_name: poll_system.options_overview
+  weight: 0
+poll_system.votes_admin:
+  title: 'Poll votes'
+  description: 'All votes registered'
+  route_name: entity.poll_vote.collection
+  parent: system.admin_content
+  weight: 12
+poll_system.settings:
+  title: 'Poll System settings'
+  description: 'Global settings for Poll System'
+  parent: system.admin_config_system
+  route_name: poll_system.settings
+  weight: 90
+poll_system.front_polls_link:
+  title: 'Polls'
+  description: 'See available polls'
+  route_name: poll_system.vote_list
+  menu_name: main
+  weight: 0

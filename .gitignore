@@ -1,0 +1,25 @@
+# Composer
+composer.lock
+/vendor/
+/web/core/
+/web/profiles/
+/web/themes/
+/web/modules/contrib/
+
+# Drupal runtime
+/web/sites/*/*settings*.php
+/web/sites/*/files/
+/web/sites/*/private/
+
+# Cache & logs
+/web/sites/*/files/php/
+/web/sites/*/files/css/
+/web/sites/*/files/js/
+/web/sites/*/files/styles/
+*.log
+
+# IDE e SO
+/.idea/
+/.vscode/
+/.DS_Store
+

@@ -1,0 +1,10 @@
+name: 'Poll System'
+type: module
+description: 'Simple, high-performance polling (custom entities + custom JSON API).'
+core_version_requirement: '^10'
+package: 'Custom'
+dependencies:
+  - drupal:user
+  - drupal:image
+  - drupal:system
+  - drupal:file

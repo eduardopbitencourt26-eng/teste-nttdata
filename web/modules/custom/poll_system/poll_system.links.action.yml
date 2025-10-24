@@ -1,0 +1,6 @@
+poll_system.poll_question_add:
+  route_name: entity.poll_question.add_form
+  title: 'Add poll question'
+  appears_on:
+    - entity.poll_question.collection
+

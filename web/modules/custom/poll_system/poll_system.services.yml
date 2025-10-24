@@ -1,0 +1,27 @@
+services:
+  logger.channel.poll_system:
+    parent: 'logger.channel_base'
+    arguments: ['poll_system']
+
+  poll_system.repository:
+    class: 'Drupal\poll_system\Repository\PollRepository'
+    arguments: ['@entity_type.manager', '@database', '@logger.channel.poll_system', '@cache.poll_system']
+    calls:
+      - [ setStringTranslation, [ '@string_translation' ] ]
+
+  poll_system.vote_service:
+    class: 'Drupal\poll_system\Service\VoteService'
+    arguments: ['@poll_system.repository', '@current_user', '@entity_type.manager', '@database', '@logger.channel.poll_system', '@config.factory', '@datetime.time', '@uuid', '@cache_tags.invalidator']
+
+  poll_system.token_service:
+    class: Drupal\poll_system\Service\ApiTokenService
+    arguments: ['@keyvalue.expirable', '@logger.channel.poll_system']
+
+  poll_system.rate_limiter:
+    class: 'Drupal\poll_system\Service\RateLimiter'
+    arguments: ['@keyvalue.expirable', '@datetime.time']
+
+  cache.poll_system:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    factory: cache_factory:get
+    arguments: ['poll_system']

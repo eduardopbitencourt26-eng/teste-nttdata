@@ -1,0 +1,183 @@
+{
+  "info": {
+    "name": "Poll System API",
+    "_postman_id": "poll-system-collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection para autenticação manual (/login), voto via Bearer e logout (/logout), além dos endpoints paginados de listagem de perguntas/opções e resultados."
+  },
+  "item": [
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{USERNAME}}\",\n  \"password\": \"{{PASSWORD}}\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE}}/api/login",
+          "host": ["{{BASE}}"],
+          "path": ["api","login"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login OK', function () {",
+              "  pm.response.to.have.status(200);",
+              "  const data = pm.response.json();",
+              "  pm.expect(data).to.have.property('access_token');",
+              "  pm.collectionVariables.set('ACCESS_TOKEN', data.access_token);",
+              "  pm.collectionVariables.set('ACCESS_TOKEN_EXPIRES_IN', data.expires_in || 0);",
+              "  pm.collectionVariables.set('LOGGED_UID', data.uid || '');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List questions",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-API-Key", "value": "{{API_KEY}}" }
+        ],
+        "url": {
+          "raw": "{{BASE}}/api/poll/questions?page={{page}}&per_page={{per_page}}",
+          "host": ["{{BASE}}"],
+          "path": ["api","poll","questions"],
+          "query": [
+            { "key": "page", "value": "{{page}}" },
+            { "key": "per_page", "value": "{{per_page}}" }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('List OK', function () {",
+              "  pm.response.to.have.status(200);",
+              "  const res = pm.response.json();",
+              "  pm.expect(res).to.have.property('data');",
+              "  if (Array.isArray(res.data) && res.data.length > 0) {",
+              "    pm.collectionVariables.set('question_id', res.data[0].id);",
+              "  }",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get question",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-API-Key", "value": "{{API_KEY}}" }
+        ],
+        "url": {
+          "raw": "{{BASE}}/api/poll/questions/{{question_id}}?page={{page}}&per_page={{per_page}}",
+          "host": ["{{BASE}}"],
+          "path": ["api","poll","questions","{{question_id}}"],
+          "query": [
+            { "key": "page", "value": "{{page}}" },
+            { "key": "per_page", "value": "{{per_page}}" }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Get question OK', function () {",
+              "  pm.response.to.have.status(200);",
+              "  const res = pm.response.json();",
+              "  pm.expect(res).to.have.property('data');",
+              "  const q = res.data;",
+              "  if (q && Array.isArray(q.options) && q.options.length > 0) {",
+              "    pm.collectionVariables.set('option_id', q.options[0].id);",
+              "  }",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vote",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{ACCESS_TOKEN}}" },
+          { "key": "X-API-Key", "value": "{{API_KEY}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"option_id\": {{option_id}}\n}"
+        },
+        "url": {
+          "raw": "{{BASE}}/api/poll/questions/{{question_id}}/vote",
+          "host": ["{{BASE}}"],
+          "path": ["api","poll","questions","{{question_id}}","vote"]
+        }
+      }
+    },
+    {
+      "name": "Results",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-API-Key", "value": "{{API_KEY}}" }
+        ],
+        "url": {
+          "raw": "{{BASE}}/api/poll/questions/{{question_id}}/results?page={{page}}&per_page={{per_page}}",
+          "host": ["{{BASE}}"],
+          "path": ["api","poll","questions","{{question_id}}","results"],
+          "query": [
+            { "key": "page", "value": "{{page}}" },
+            { "key": "per_page", "value": "{{per_page}}" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Logout",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{ACCESS_TOKEN}}" }
+        ],
+        "url": {
+          "raw": "{{BASE}}/api/logout",
+          "host": ["{{BASE}}"],
+          "path": ["api","logout"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "BASE", "value": "http://localhost" },
+    { "key": "API_KEY", "value": "" },
+    { "key": "USERNAME", "value": "" },
+    { "key": "PASSWORD", "value": "" },
+    { "key": "ACCESS_TOKEN", "value": "" },
+    { "key": "question_id", "value": "1" },
+    { "key": "option_id", "value": "1" },
+    { "key": "page", "value": "1" },
+    { "key": "per_page", "value": "10" }
+  ]
+}

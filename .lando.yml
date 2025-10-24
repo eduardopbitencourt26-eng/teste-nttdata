@@ -1,0 +1,14 @@
+name: sistema-votacao
+recipe: drupal10
+config:
+  php: "8.3"
+  via: nginx
+  database: mysql:8.0
+  drush: ^11
+  composer_version: 2-latest
+  webroot: web
+tooling:
+  drush:
+    service: appserver
+    env:
+      DRUSH_OPTIONS_URI: "https://sistema-votacao.lndo.site"
