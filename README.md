@@ -8,12 +8,12 @@ Este projeto entrega um sistema de votação (perguntas/opções, votos únicos 
 
 
 ## Instalação com dump
-1. git clone <URL-do-repo> sistema-votacao
-2. cd sistema-votacao
-3. lando start
-4. lando composer install
-5. lando db-import caminho/para/o/dump.sql.gz
-6. lando drush cr
+1. `git clone <URL-do-repo> sistema-votacao`
+2. `cd sistema-votacao`
+3. `lando start`
+4. `lando composer install`
+5. `lando db-import caminho/para/o/dump.sql.gz`
+6. `lando drush cr`
 4. Habilite: `lando drush en poll_system -y`.
 5. Conceda Permissões:
     **Access Poll System API (Read)** => Anonymous User,
