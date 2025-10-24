@@ -24,7 +24,8 @@ class PollRepository
     protected CacheBackendInterface $cache
   ) {}
 
-  public function countActiveQuestions(): int {
+  public function countActiveQuestions(): int
+  {
     return (int) $this->etm->getStorage('poll_question')
       ->getQuery()
       ->accessCheck(FALSE)
@@ -33,7 +34,8 @@ class PollRepository
       ->execute();
   }
 
-  public function countOptionsForQuestion(int $question_id): int {
+  public function countOptionsForQuestion(int $question_id): int
+  {
     return (int) $this->etm->getStorage('poll_option')
       ->getQuery()
       ->accessCheck(FALSE)
@@ -56,10 +58,8 @@ class PollRepository
     return $q;
   }
 
-  /**
-   * Carrega opções da pergunta (paginação opcional).
-   */
-  public function loadOptionsForQuestion(int $question_id, int $offset = 0, ?int $limit = NULL): array {
+  public function loadOptionsForQuestion(int $question_id, int $offset = 0, ?int $limit = NULL): array
+  {
     $storage = $this->etm->getStorage('poll_option');
 
     $q = $storage->getQuery()
@@ -75,23 +75,22 @@ class PollRepository
     return $ids ? $storage->loadMultiple($ids) : [];
   }
 
-  public function optionsAdminTable(Question $q): array {
+  public function optionsAdminTable(Question $q): array
+  {
     // Quantidade por página
     $limit = 5;
-  
-    // 1) Busca paginada de IDs das options da pergunta
+
     $storage = $this->etm->getStorage('poll_option');
     $ids = $storage->getQuery()
       ->accessCheck(FALSE)
       ->condition('question', (int) $q->id())
       ->sort('weight', 'ASC')
-      ->pager($limit)        // 👈 pagina aqui
+      ->pager($limit)
       ->execute();
-  
+
     /** @var \Drupal\poll_system\Entity\Option[] $options */
     $options = $ids ? $storage->loadMultiple($ids) : [];
-  
-    // 2) Verifica se precisa exibir colunas Description / Image (com base no que está na página)
+
     $has_desc = FALSE;
     $has_img  = FALSE;
     foreach ($options as $o) {
@@ -106,8 +105,7 @@ class PollRepository
         break;
       }
     }
-  
-    // 3) Cabeçalho dinâmico
+
     $header = [
       $this->t('ID'),
       $this->t('Title'),
@@ -119,19 +117,18 @@ class PollRepository
       $header[] = $this->t('Image');
     }
     $header[] = $this->t('Operations');
-  
-    // 4) Linhas
+
     $rows = [];
     foreach ($options as $o) {
       $row = [];
       $row[] = (int) $o->id();
       $row[] = $o->label();
-  
+
       if ($has_desc) {
         $desc = trim((string) $o->get('description')->value);
         $row[] = $desc !== '' ? $desc : '';
       }
-  
+
       if ($has_img) {
         $img_cell = '';
         if ($file = $o->get('image')->entity) {
@@ -148,8 +145,7 @@ class PollRepository
         }
         $row[] = $img_cell;
       }
-  
-      // Dropbutton "Operations"
+
       $row[] = [
         'data' => [
           '#type' => 'operations',
@@ -165,28 +161,24 @@ class PollRepository
           ],
         ],
       ];
-  
+
       $rows[] = $row;
     }
-  
-    // 5) Render: tabela + pager
+
     $build['table'] = [
       '#type' => 'table',
       '#header' => $header,
       '#rows' => $rows,
       '#empty' => $this->t('No options yet.'),
     ];
-  
-    $build['pager'] = ['#type' => 'pager']; // 👈 mostra a paginação
-  
+
+    $build['pager'] = ['#type' => 'pager'];
+
     return $build;
   }
-  
 
-  /**
-   * Lista perguntas ativas ( paginação opcional).
-   */
-  public function listActiveQuestions(int $offset = 0, ?int $limit = NULL): array {
+  public function listActiveQuestions(int $offset = 0, ?int $limit = NULL): array
+  {
     $storage = $this->etm->getStorage('poll_question');
     $q = $storage->getQuery()
       ->accessCheck(FALSE)
@@ -212,10 +204,8 @@ class PollRepository
     return $out;
   }
 
-  /**
-   * Payload de pergunta + opções ( paginação opcional nas opções).
-   */
-  public function getQuestionPayload(int $id, int $offset = 0, ?int $limit = NULL): ?array {
+  public function getQuestionPayload(int $id, int $offset = 0, ?int $limit = NULL): ?array
+  {
     /** @var \Drupal\poll_system\Entity\Question|null $q */
     $q = $this->etm->getStorage('poll_question')->load($id);
     if (!$q || !(bool) $q->get('status')->value) {
@@ -241,29 +231,27 @@ class PollRepository
       'title' => (string) $q->label(),
       'show_results' => (bool) $q->get('show_results')->value,
       'options' => $opts,
-      '_options_total' => $total_opts, // meta para a API
+      '_options_total' => $total_opts,
     ];
   }
 
-  public function resultsData(int $question_id, int $offset = 0, ?int $limit = NULL): array {
-    // Cache HIT/MISS mantido
+  public function resultsData(int $question_id, int $offset = 0, ?int $limit = NULL): array
+  {
+    // Cache HIT/MISS
     $cache_key = 'poll_results:' . $question_id . ':' . (int)$offset . ':' . (int)($limit ?? 0);
     if ($cached = $this->cache->get($cache_key)) {
       $this->logger->debug('resultsData cache HIT @id', ['@id' => $question_id]);
       return $cached->data;
     }
 
-    // total de votos
     $totalVotes = (int) $this->db->select('poll_vote', 'v')
       ->condition('v.question', $question_id)
       ->countQuery()
       ->execute()
       ->fetchField();
 
-    // total de opções (para paginação)
     $totalOptions = $this->countOptionsForQuestion($question_id);
 
-    // linhas agregadas por opção (pagináveis)
     $q = $this->db->select('poll_option', 'o')
       ->fields('o', ['id', 'title', 'weight'])
       ->condition('o.question', $question_id);
@@ -293,8 +281,8 @@ class PollRepository
     }
 
     $data = [
-      'total' => $totalVotes,           // compat UI
-      'total_options' => $totalOptions, // meta p/ API
+      'total' => $totalVotes,
+      'total_options' => $totalOptions,
       'options' => $out,
     ];
 

@@ -7,22 +7,21 @@ namespace Drupal\poll_system\Service;
 use Drupal\Core\KeyValueStore\KeyValueExpirableFactoryInterface;
 use Drupal\Component\Datetime\TimeInterface;
 
-final class RateLimiter {
+final class RateLimiter
+{
 
   public function __construct(
     private readonly KeyValueExpirableFactoryInterface $kv,
     private readonly TimeInterface $time,
   ) {}
 
-  private function bin() {
+  private function bin()
+  {
     return $this->kv->get('poll_system.ratelimit');
   }
 
-  /**
-   * Permite no máx. $max requisições por $windowSeg para a chave $key.
-   * Retorna true se pode prosseguir; false se estourou.
-   */
-  public function allow(string $key, int $max, int $windowSeg): bool {
+  public function allow(string $key, int $max, int $windowSeg): bool
+  {
     $now = $this->time->getRequestTime();
     $bucketKey = $key . ':' . (int) floor($now / $windowSeg);
 

@@ -124,7 +124,7 @@ poll_system.api.login:
   defaults:
     _controller: '\Drupal\poll_system\Controller\ApiController::login'
   requirements:
-    _permission: 'access content'   # permitir anonymous logar
+    _permission: 'access content'
 
 poll_system.api.logout:
   path: '/api/logout'

@@ -34,9 +34,11 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *   }
  * )
  */
-class Option extends ContentEntityBase {
+class Option extends ContentEntityBase
+{
 
-  public static function baseFieldDefinitions(EntityTypeInterface $entity_type): array {
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type): array
+  {
     $fields = parent::baseFieldDefinitions($entity_type);
 
     $fields['id'] = BaseFieldDefinition::create('integer')->setLabel(t('ID'))->setReadOnly(TRUE);

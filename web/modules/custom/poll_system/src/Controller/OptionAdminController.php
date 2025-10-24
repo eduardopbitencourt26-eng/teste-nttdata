@@ -11,20 +11,22 @@ use Drupal\poll_system\Entity\Question;
 use Drupal\poll_system\Repository\PollRepository;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class OptionAdminController extends ControllerBase {
+class OptionAdminController extends ControllerBase
+{
 
   public function __construct(protected PollRepository $repo) {}
 
-  public static function create(ContainerInterface $container): static {
+  public static function create(ContainerInterface $container): static
+  {
     return new static($container->get('poll_system.repository'));
   }
 
-  public function list(Question $poll_question) {
+  public function list(Question $poll_question)
+  {
     $build['title'] = [
       '#markup' => '<h2>' . $this->t('Options for: @t', ['@t' => $poll_question->label()]) . '</h2>',
     ];
 
-    // ✅ Link correto para adicionar opção da questão atual
     $add_link = Link::fromTextAndUrl(
       $this->t('Add option'),
       Url::fromRoute('entity.poll_option.add_form', ['poll_question' => $poll_question->id()])
@@ -32,14 +34,13 @@ class OptionAdminController extends ControllerBase {
     $add_link['#attributes']['class'] = ['button', 'button--primary'];
 
     $build['add'] = $add_link;
-
-    // Tabela de opções
     $build['table'] = $this->repo->optionsAdminTable($poll_question);
 
     return $build;
   }
 
-  public function overview() {
+  public function overview()
+  {
     // paginação
     $limit = 5;
 
@@ -49,26 +50,25 @@ class OptionAdminController extends ControllerBase {
       $this->t('Options'),
       $this->t('Operations'),
     ];
-  
+
     $storage_q = $this->entityTypeManager()->getStorage('poll_question');
     $ids = $storage_q->getQuery()->accessCheck(FALSE)->pager($limit)->execute();
     $rows = [];
-  
+
     if ($ids) {
       /** @var \Drupal\poll_system\Entity\Question[] $questions */
       $questions = $storage_q->loadMultiple($ids);
-      // Ordem por id para ficar estável.
+      // Ordem por id
       ksort($questions);
-  
+
       foreach ($questions as $q) {
-        // Conta opções rapidamente.
         $count = $this->entityTypeManager()->getStorage('poll_option')
           ->getQuery()
           ->accessCheck(FALSE)
           ->condition('question', (int) $q->id())
           ->count()
           ->execute();
-  
+
         $rows[] = [
           (int) $q->id(),
           $q->label(),
@@ -91,7 +91,7 @@ class OptionAdminController extends ControllerBase {
         ];
       }
     }
-  
+
     return [
       'table' => [
         '#type' => 'table',

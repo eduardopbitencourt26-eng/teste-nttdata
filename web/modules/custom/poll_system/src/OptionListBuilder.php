@@ -7,12 +7,11 @@ namespace Drupal\poll_system;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 
-/**
- * List builder for options.
- */
-class OptionListBuilder extends EntityListBuilder {
+class OptionListBuilder extends EntityListBuilder
+{
 
-  public function buildHeader(): array {
+  public function buildHeader(): array
+  {
     $header['id'] = $this->t('ID');
     $header['title'] = $this->t('Title');
     $header['question'] = $this->t('Question');
@@ -20,7 +19,8 @@ class OptionListBuilder extends EntityListBuilder {
     return $header + parent::buildHeader();
   }
 
-  public function buildRow(EntityInterface $entity): array {
+  public function buildRow(EntityInterface $entity): array
+  {
     /** @var \Drupal\poll_system\Entity\Option $entity */
     $row['id'] = $entity->id();
     $row['title'] = $entity->label();

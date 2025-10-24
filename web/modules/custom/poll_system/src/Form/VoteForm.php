@@ -11,70 +11,72 @@ use Drupal\poll_system\Repository\PollRepository;
 use Drupal\poll_system\Service\VoteService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class VoteForm extends FormBase {
+class VoteForm extends FormBase
+{
 
   public function __construct(
     protected VoteService $voteService,
     protected PollRepository $repo,
   ) {}
 
-  public static function create(ContainerInterface $container): static {
+  public static function create(ContainerInterface $container): static
+  {
     return new static(
       $container->get('poll_system.vote_service'),
       $container->get('poll_system.repository'),
     );
   }
 
-  public function getFormId(): string {
+  public function getFormId(): string
+  {
     return 'poll_system_vote_form';
   }
 
   /**
    * @param array $form
    * @param \Drupal\Core\Form\FormStateInterface $form_state
-   * @param \Drupal\poll_system\Entity\Question $poll_question  // passado pelo controller
+   * @param \Drupal\poll_system\Entity\Question $poll_question
    */
-  public function buildForm(array $form, FormStateInterface $form_state, Question $poll_question = NULL): array {
+  public function buildForm(array $form, FormStateInterface $form_state, Question $poll_question = NULL): array
+  {
     if (!$poll_question || !$poll_question->get('status')->value) {
       $form['msg'] = ['#markup' => $this->t('Question not found or disabled.')];
       return $form;
     }
 
-    // 🔹 título e descrição da pergunta
     $form['question_header'] = [
-        '#type' => 'container',
-        '#attributes' => ['class' => ['poll-question__header']],
-        'title' => [
-            '#markup' => '<h2 class="poll-question__title">' . $poll_question->label() . '</h2>',
-        ],
+      '#type' => 'container',
+      '#attributes' => ['class' => ['poll-question__header']],
+      'title' => [
+        '#markup' => '<h2 class="poll-question__title">' . $poll_question->label() . '</h2>',
+      ],
     ];
-  
+
     $options = $this->repo->loadOptionsForQuestion((int) $poll_question->id());
     if (!$options) {
       $form['msg'] = ['#markup' => $this->t('No options available.')];
       return $form;
     }
-  
+
     $form['question_id'] = [
       '#type' => 'value',
       '#value' => (int) $poll_question->id(),
     ];
-  
-    // Wrapper das opções (grid simples)
+
     $form['options'] = [
       '#type' => 'container',
       '#attributes' => ['class' => ['poll-options']],
     ];
-  
+
     $default = $form_state->getValue(['option_id']) ?? NULL;
     $file_url = \Drupal::service('file_url_generator');
-  
+
     foreach ($options as $opt) {
       $id = (int) $opt->id();
       $title = $opt->label();
       $desc  = (string) $opt->get('description')->value;
       $img   = $opt->get('image')->entity ? $file_url->generateString($opt->get('image')->entity->getFileUri()) : NULL;
-  
+
       $form['options']["opt_$id"] = [
         '#type' => 'container',
         '#attributes' => ['class' => ['poll-option', 'clearfix']],
@@ -82,7 +84,7 @@ class VoteForm extends FormBase {
           '#type' => 'radio',
           '#title' => $title,
           '#return_value' => $id,
-          '#parents' => ['option_id'],  // todos os radios compartilham o mesmo campo
+          '#parents' => ['option_id'],
           '#default_value' => $default,
           '#required' => TRUE,
         ],
@@ -96,20 +98,19 @@ class VoteForm extends FormBase {
             '#attributes' => ['style' => 'max-width:180px;height:auto;display:block;margin:.25rem 0;'],
           ] : [],
           'desc' => $desc ? [
-            '#markup' => '<div class="poll-option__desc">'. $this->t('@d', ['@d' => $desc]) .'</div>',
+            '#markup' => '<div class="poll-option__desc">' . $this->t('@d', ['@d' => $desc]) . '</div>',
           ] : [],
         ],
       ];
     }
-  
+
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
       '#type' => 'submit',
       '#button_type' => 'primary',
       '#value' => $this->t('Vote'),
     ];
-  
-    // CSS leve (opcional)
+
     $form['#attached']['html_head'][] = [
       [
         '#tag' => 'style',
@@ -121,12 +122,13 @@ class VoteForm extends FormBase {
       ],
       'poll_system_inline_styles',
     ];
-  
+
     return $form;
   }
-  
 
-  public function submitForm(array &$form, FormStateInterface $form_state): void {
+
+  public function submitForm(array &$form, FormStateInterface $form_state): void
+  {
     $qid = (int) $form_state->getValue('question_id');
     $oid = (int) $form_state->getValue('option_id');
 

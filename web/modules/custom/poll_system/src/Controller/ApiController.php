@@ -39,7 +39,6 @@ class ApiController extends ControllerBase
   /**
    * POST /api/login
    * Body: { "username": "...", "password": "..." }
-   * Retorna: { access_token, token_type, expires_in, uid, name, scopes }
    */
   public function login(Request $request): JsonResponse
   {
@@ -81,13 +80,12 @@ class ApiController extends ControllerBase
 
   public function logout(Request $request): JsonResponse
   {
-    // Requer o Bearer do token atual.
     $bearer = $this->tokenService->getBearerFromRequest($request);
     if (!$bearer) {
       return new JsonResponse(['ok' => FALSE, 'error' => 'Missing bearer token.'], 401);
     }
 
-    // Revoga o token na store (expira imediatamente).
+    // expira imediatamente
     $this->tokenService->revoke($bearer);
 
     return new JsonResponse(['ok' => TRUE, 'message' => 'Token revoked.']);
@@ -107,19 +105,20 @@ class ApiController extends ControllerBase
     }
   }
 
-  public function listQuestions(Request $request): JsonResponse {
+  public function listQuestions(Request $request): JsonResponse
+  {
     try {
       $this->checkApiKey($request);
     } catch (\RuntimeException $e) {
       return new JsonResponse(['error' => 'Unauthorized'], 401);
     }
-  
+
     // paginação (?page=, ?per_page=)
     [$page, $perPage, $offset] = $this->pagination($request, 20, 100);
-  
+
     $total = $this->repo->countActiveQuestions();
     $items = $this->repo->listActiveQuestions($offset, $perPage);
-  
+
     return new JsonResponse([
       'data' => $items,
       'meta' => [
@@ -130,27 +129,25 @@ class ApiController extends ControllerBase
       ],
     ]);
   }
-  
 
-  public function getQuestion(Request $request, string $question_id): JsonResponse {
+
+  public function getQuestion(Request $request, string $question_id): JsonResponse
+  {
     try {
       $this->checkApiKey($request);
     } catch (\RuntimeException $e) {
       return new JsonResponse(['error' => 'Unauthorized'], 401);
     }
-  
-    // paginação das OPÇÕES dessa pergunta
+
     [$page, $perPage, $offset] = $this->pagination($request, 20, 100);
-  
     $payload = $this->repo->getQuestionPayload((int) $question_id, $offset, $perPage);
     if (!$payload) {
       return new JsonResponse(['error' => 'Not found'], 404);
     }
-  
-    // meta para total de opções
+
     $totalOpts = (int) $payload['_options_total'];
     unset($payload['_options_total']);
-  
+
     return new JsonResponse([
       'data' => $payload,
       'meta' => [
@@ -161,7 +158,7 @@ class ApiController extends ControllerBase
       ],
     ]);
   }
-  
+
 
   public function postVote(Request $request, int $question_id): JsonResponse
   {
@@ -171,7 +168,6 @@ class ApiController extends ControllerBase
       return new JsonResponse(['error' => 'Unauthorized'], 401);
     }
 
-    // ⚠️ Agora exigimos Bearer (token emitido no /login)
     $bearer = $this->tokenService->getBearerFromRequest($request);
     if (!$bearer) {
       return new JsonResponse(['ok' => FALSE, 'error' => 'Missing bearer token.'], 401);
@@ -192,7 +188,6 @@ class ApiController extends ControllerBase
       return new JsonResponse(['ok' => FALSE, 'error' => 'Rate limit exceeded. Try again later.'], 429);
     }
 
-    // Verifica se o usuário está ativo e tem permissão para votar
     $account = $this->entityTypeManager()->getStorage('user')->load($uid);
     if (!$account || !$account->isActive()) {
       return new JsonResponse(['ok' => FALSE, 'error' => 'User disabled.'], 403);
@@ -201,7 +196,6 @@ class ApiController extends ControllerBase
       return new JsonResponse(['ok' => FALSE, 'error' => 'Insufficient permission.'], 403);
     }
 
-    // Votação global?
     $settings = $this->config('poll_system.settings');
     if (!($settings->get('voting_enabled') ?? TRUE)) {
       return new JsonResponse(['ok' => FALSE, 'error' => 'Voting is disabled.'], 503);
@@ -227,7 +221,6 @@ class ApiController extends ControllerBase
     }
 
     try {
-      // Passa uid do token para o VoteService
       $msg = $this->voteService->castVoteById((int) $q_entity->id(), $option_id, $uid);
       return new JsonResponse(['ok' => TRUE, 'message' => $msg]);
     } catch (\Throwable $e) {
@@ -237,30 +230,30 @@ class ApiController extends ControllerBase
   }
 
 
-  public function getResults(Request $request, string $question_id): JsonResponse {
+  public function getResults(Request $request, string $question_id): JsonResponse
+  {
     try {
       $this->checkApiKey($request);
     } catch (\RuntimeException $e) {
       return new JsonResponse(['error' => 'Unauthorized'], 401);
     }
-  
+
     $q = $this->repo->loadQuestionById((int) $question_id);
     if (!$q) {
       return new JsonResponse(['error' => 'Not found'], 404);
     }
-  
+
     if (!(bool) $q->get('show_results')->value) {
       return new JsonResponse([
         'error' => 'Results are hidden for this question.',
         'show_results' => FALSE,
       ], 403);
     }
-  
-    // paginação das LINHAS agregadas por opção
+
     [$page, $perPage, $offset] = $this->pagination($request, 20, 100);
-  
+
     $results = $this->repo->resultsData((int) $q->id(), $offset, $perPage);
-  
+
     return new JsonResponse([
       'question' => [
         'id' => (int) $q->id(),
@@ -279,14 +272,14 @@ class ApiController extends ControllerBase
       ],
     ]);
   }
-  
 
-  private function pagination(Request $request, int $defaultPerPage = 20, int $maxPerPage = 100): array {
+
+  private function pagination(Request $request, int $defaultPerPage = 20, int $maxPerPage = 100): array
+  {
     $page = max(1, (int) $request->query->get('page', 1));
     $perPage = (int) $request->query->get('per_page', $defaultPerPage);
     $perPage = max(1, min($perPage, $maxPerPage));
     $offset = ($page - 1) * $perPage;
     return [$page, $perPage, $offset];
   }
-  
 }

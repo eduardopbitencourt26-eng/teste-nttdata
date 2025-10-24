@@ -7,7 +7,7 @@ poll_system.admin:
 poll_system.admin.options:
   title: 'Options'
   description: 'Manage options grouped by question'
-  parent: poll_system.admin          # 👈 vira dropdown sob “Polls”
+  parent: poll_system.admin
   route_name: poll_system.options_overview
   weight: 0
 poll_system.votes_admin:

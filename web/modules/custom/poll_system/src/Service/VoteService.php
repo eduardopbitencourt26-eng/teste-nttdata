@@ -15,7 +15,8 @@ use Drupal\poll_system\Repository\PollRepository;
 use Drupal\Core\Cache\CacheTagsInvalidatorInterface;
 use Psr\Log\LoggerInterface;
 
-final class VoteService {
+final class VoteService
+{
 
   public function __construct(
     private readonly PollRepository $repo,
@@ -29,11 +30,8 @@ final class VoteService {
     protected CacheTagsInvalidatorInterface $tagInvalidator
   ) {}
 
-  /**
-   * Registra um voto para a pergunta $id na opção $option_id.
-   * Se $uid for null, usa o usuário logado (UI). Para API, passe o uid do token.
-   */
-  public function castVoteById(int $id, int $option_id, ?int $uid = null): string {
+  public function castVoteById(int $id, int $option_id, ?int $uid = null): string
+  {
     $cfg = $this->configFactory->get('poll_system.settings');
     if (!($cfg->get('voting_enabled') ?? true)) {
       throw new \RuntimeException('Voting is disabled.');
@@ -49,7 +47,6 @@ final class VoteService {
       throw new \RuntimeException('Question not found or disabled.');
     }
 
-    // Garante que a opção pertence à pergunta.
     $opt_storage = $this->etm->getStorage('poll_option');
     $option = $opt_storage->load($option_id);
     if (!$option || (int) $option->get('question')->target_id !== (int) $q->id()) {
@@ -58,7 +55,6 @@ final class VoteService {
 
     $this->db->startTransaction();
     try {
-      // Checagem de idempotência por (question, uid).
       $exists = $this->db->select('poll_vote', 'v')
         ->fields('v', ['id'])
         ->condition('question', (int) $q->id())
@@ -92,16 +88,13 @@ final class VoteService {
       ]);
 
       return 'Vote registered.';
-    }
-    catch (DatabaseExceptionWrapper $e) {
-      // Se a unique (question, uid) disparar numa corrida, normalize a mensagem.
+    } catch (DatabaseExceptionWrapper $e) {
       if ($e->getCode() === '23000' || str_contains($e->getMessage(), 'Duplicate')) {
         throw new \RuntimeException('You have already voted on this question.');
       }
       $this->logger->error('Vote DB error: @m', ['@m' => $e->getMessage()]);
       throw $e;
-    }
-    catch (\Throwable $e) {
+    } catch (\Throwable $e) {
       $this->logger->error('Vote error: @m', ['@m' => $e->getMessage()]);
       throw $e;
     }

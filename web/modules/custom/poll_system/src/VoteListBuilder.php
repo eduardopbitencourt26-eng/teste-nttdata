@@ -7,16 +7,13 @@ namespace Drupal\poll_system;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 
-final class VoteListBuilder extends EntityListBuilder {
+final class VoteListBuilder extends EntityListBuilder
+{
 
-  /**
-   * Quantidade de registros por página.
-   *
-   * @var int
-   */
   protected $limit = 5;
 
-  public function buildHeader(): array {
+  public function buildHeader(): array
+  {
     $header['id'] = $this->t('ID');
     $header['question'] = $this->t('Question');
     $header['option'] = $this->t('Option');
@@ -25,11 +22,12 @@ final class VoteListBuilder extends EntityListBuilder {
     return $header;
   }
 
-  public function buildRow(EntityInterface $entity): array {
+  public function buildRow(EntityInterface $entity): array
+  {
     /** @var \Drupal\poll_system\Entity\Vote $entity */
     $q   = $entity->get('question')->entity;
     $opt = $entity->get('option')->entity;
-    $user= $entity->get('uid')->entity;
+    $user = $entity->get('uid')->entity;
 
     $question_link = $q
       ? $q->toLink($q->label(), 'edit-form')->toRenderable()
@@ -56,7 +54,6 @@ final class VoteListBuilder extends EntityListBuilder {
       ->accessCheck(FALSE)
       ->sort($this->entityType->getKey('id'), 'DESC');
 
-    // 🔹 Ativa o pager se o limite for maior que zero.
     if ($this->limit > 0) {
       $query->pager($this->limit);
     }
@@ -70,8 +67,6 @@ final class VoteListBuilder extends EntityListBuilder {
   public function render(): array
   {
     $build = parent::render();
-
-    // 🔹 Renderiza o pager abaixo da tabela.
     if ($this->limit > 0) {
       $build['pager'] = [
         '#type' => 'pager',

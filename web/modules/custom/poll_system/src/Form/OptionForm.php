@@ -11,7 +11,8 @@ use Drupal\file\FileUsage\FileUsageInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class OptionForm extends EntityForm {
+class OptionForm extends EntityForm
+{
 
   public function __construct(
     protected EntityTypeManagerInterface $etm,
@@ -19,7 +20,8 @@ class OptionForm extends EntityForm {
     protected FileUsageInterface $fileUsage
   ) {}
 
-  public static function create(ContainerInterface $container): static {
+  public static function create(ContainerInterface $container): static
+  {
     return new static(
       $container->get('entity_type.manager'),
       $container->get('file_system'),
@@ -27,17 +29,16 @@ class OptionForm extends EntityForm {
     );
   }
 
-  public function getFormId(): string {
+  public function getFormId(): string
+  {
     return 'poll_system_option_form';
   }
 
-  public function buildForm(array $form, FormStateInterface $form_state): array {
+  public function buildForm(array $form, FormStateInterface $form_state): array
+  {
     /** @var \Drupal\poll_system\Entity\Option $option */
     $option = $this->getEntity();
 
-    // Se veio de /admin/content/polls/{poll_question}/options/add,
-    // preenche o question automaticamente.
-    // Pode vir como entidade ou como ID numérico
     $route_question = $this->getRouteMatch()->getParameter('poll_question');
     $default_question_id = NULL;
 
@@ -52,7 +53,7 @@ class OptionForm extends EntityForm {
     $question_storage = $this->etm->getStorage('poll_question');
 
     if ($default_question_id) {
-      // ✅ Visível mas não editável
+      // readonly
       $form['question_display'] = [
         '#type' => 'entity_autocomplete',
         '#title' => $this->t('Question'),
@@ -61,14 +62,11 @@ class OptionForm extends EntityForm {
         '#disabled' => TRUE,
         '#description' => $this->t('This option will be created for the question above.'),
       ];
-      // ✅ Hidden com o valor real para o submit
       $form['question'] = [
         '#type' => 'value',
         '#value' => $default_question_id,
       ];
-    }
-    else {
-      // Fallback: tela “solta” sem id na URL → deixa escolher
+    } else {
       $form['question'] = [
         '#type' => 'entity_autocomplete',
         '#title' => $this->t('Question'),
@@ -94,7 +92,6 @@ class OptionForm extends EntityForm {
       '#rows' => 3,
     ];
 
-    // Upload simples via managed_file.
     $form['image'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('Image'),
@@ -124,27 +121,24 @@ class OptionForm extends EntityForm {
     return $form;
   }
 
-  public function validateForm(array &$form, FormStateInterface $form_state): void {
-    // Apenas sanity checks simples aqui. (peso numérico etc.)
+  public function validateForm(array &$form, FormStateInterface $form_state): void
+  {
     $weight = $form_state->getValue('weight');
     if ($weight !== '' && !is_numeric($weight)) {
       $form_state->setErrorByName('weight', $this->t('Weight must be a number.'));
     }
   }
 
-  public function submitForm(array &$form, FormStateInterface $form_state): void {
+  public function submitForm(array &$form, FormStateInterface $form_state): void
+  {
     /** @var \Drupal\poll_system\Entity\Option $option */
     $option = $this->getEntity();
 
-    // Question
     $question_target = (int) ($form_state->getValue('question') ?? 0);
     $option->set('question', $question_target);
-
-    // Title / Description
     $option->set('title', trim((string) $form_state->getValue('title')));
     $option->set('description', (string) $form_state->getValue('description'));
 
-    // Image (managed_file retorna array de fids).
     $fid_arr = (array) ($form_state->getValue('image') ?? []);
     if (!empty($fid_arr[0])) {
       $fid = (int) $fid_arr[0];
@@ -153,7 +147,6 @@ class OptionForm extends EntityForm {
       if ($file) {
         $file->setPermanent();
         $file->save();
-        // Registra uso do arquivo para não ser limpo por garbage collection.
         $this->fileUsage->add($file, 'poll_system', 'poll_option', 0);
         $option->set('image', $fid);
       }
@@ -161,14 +154,12 @@ class OptionForm extends EntityForm {
       $option->set('image', NULL);
     }
 
-    // Weight
     $option->set('weight', (int) $form_state->getValue('weight'));
-
     $option->save();
 
     $this->messenger()->addStatus($this->t('Option %t saved.', ['%t' => $option->label()]));
 
-    // Redireciona para a lista de opções da respectiva pergunta.
+    // Redireciona para a lista de opções da respectiva pergunta
     if ($question_target) {
       $form_state->setRedirect('entity.poll_option.collection', ['poll_question' => $question_target]);
     } else {

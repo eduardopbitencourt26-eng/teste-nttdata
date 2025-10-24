@@ -1,6 +1,6 @@
 name: 'Poll System'
 type: module
-description: 'Simple, high-performance polling (custom entities + custom JSON API).'
+description: 'Sistema de votação para teste técnico NTTData'
 core_version_requirement: '^10'
 package: 'Custom'
 dependencies:

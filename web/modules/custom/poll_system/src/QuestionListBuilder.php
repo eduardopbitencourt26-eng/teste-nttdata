@@ -7,22 +7,10 @@ namespace Drupal\poll_system;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 
-/**
- * List builder for questions.
- */
 class QuestionListBuilder extends EntityListBuilder
 {
-
-  /**
-   * Quantidade de registros por página.
-   *
-   * @var int
-   */
   protected $limit = 5;
 
-  /**
-   * Define os cabeçalhos da tabela.
-   */
   public function buildHeader(): array
   {
     $header['id'] = $this->t('ID');
@@ -32,9 +20,6 @@ class QuestionListBuilder extends EntityListBuilder
     return $header + parent::buildHeader();
   }
 
-  /**
-   * Define as linhas de cada registro.
-   */
   public function buildRow(EntityInterface $entity): array
   {
     /** @var \Drupal\poll_system\Entity\Question $entity */
@@ -54,7 +39,6 @@ class QuestionListBuilder extends EntityListBuilder
       ->accessCheck(FALSE)
       ->sort($this->entityType->getKey('id'), 'DESC');
 
-    // 🔹 Ativa o pager se o limite for maior que zero.
     if ($this->limit > 0) {
       $query->pager($this->limit);
     }
@@ -68,8 +52,6 @@ class QuestionListBuilder extends EntityListBuilder
   public function render(): array
   {
     $build = parent::render();
-
-    // 🔹 Renderiza o pager abaixo da tabela.
     if ($this->limit > 0) {
       $build['pager'] = [
         '#type' => 'pager',
