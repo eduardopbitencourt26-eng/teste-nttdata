@@ -4,18 +4,28 @@ poll_system.admin:
   parent: system.admin_content
   route_name: entity.poll_question.collection
   weight: 10
+
+poll_system.admin.questions:
+  title: 'Questions'
+  description: 'Manage questions'
+  parent: poll_system.admin
+  route_name: entity.poll_question.collection
+  weight: 0
+
 poll_system.admin.options:
   title: 'Options'
   description: 'Manage options grouped by question'
   parent: poll_system.admin
   route_name: poll_system.options_overview
-  weight: 0
-poll_system.votes_admin:
+  weight: 1
+
+poll_system.admin.votes:
   title: 'Poll votes'
   description: 'All votes registered'
+  parent: poll_system.admin
   route_name: entity.poll_vote.collection
-  parent: system.admin_content
-  weight: 12
+  weight: 2
+
 poll_system.settings:
   title: 'Poll System settings'
   description: 'Global settings for Poll System'

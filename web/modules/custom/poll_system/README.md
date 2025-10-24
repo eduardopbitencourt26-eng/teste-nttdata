@@ -52,13 +52,14 @@ A API exige X-API-Key (config interna) e Bearer Token para votar.
 - `lando drush cset poll_system.settings api_key 'minha-api-key' -y`
 - `lando drush cr`
 
-## Admin
+## Admin CMS
 - Lista de perguntas cadastradas: `/admin/content/polls`
 - Lista de perguntas + quantidade de opções: `/admin/content/polls/options`
 - Lista de opções cadastradas na pergunta: `/admin/content/polls/{ID}/options`
+- Lista de votos registrados: `/admin/content/polls/votes`
 
-## UI CMS
-- Página de listagem de perguntas abertas: `/polls`
+## Frontend
+- Página de listagem de perguntas abertas: `/polls` (Menu header do front)
 - Página de votação em pergunta específica (autenticar para votar): `/poll/{id}`
 
 ## Documentação da API
