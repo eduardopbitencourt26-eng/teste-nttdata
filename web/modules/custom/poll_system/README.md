@@ -61,15 +61,69 @@ A API exige X-API-Key (config interna) e Bearer Token para votar.
 - Página de listagem de perguntas abertas: `/polls`
 - Página de votação em pergunta específica (autenticar para votar): `/poll/{id}`
 
-## API
+## Documentação da API
 Envie `X-API-Key` se configurado(`/admin/config/system/poll-system`), para todos os endpoints da API.
 
-- `POST /api/login` — body `{"username": "{{USERNAME}}", "password": "{{PASSWORD}}" }`
-- `GET /api/poll/questions` — params `?page={{page}}&per_page={{per_page}}`
-- `GET /api/poll/questions/{id}` — params `?page={{page}}&per_page={{per_page}}`
-- `POST /api/poll/questions/{id}/vote` — body `{ "option_id": <int> }`
-- `GET /api/poll/questions/{id}/results` — params `?page={{page}}&per_page={{per_page}}`
-- `POST /api/logout` 
+#### Login para preencher Bearer Token
+
+```http
+  POST /api/login
+```
+
+| Body   | Tipo       | Descrição                           |
+| :---------- | :--------- | :---------------------------------- |
+| `username` | `string` | **Obrigatório**. Username do Drupal |
+| `password` | `string` | **Obrigatório**. Password do Drupal |
+
+#### Retorna a lista de Perguntas abertas
+
+```http
+  GET /api/poll/questions
+```
+
+| Params   | Tipo       | Descrição                                   |
+| :---------- | :--------- | :------------------------------------------ |
+| `page`      | `int` | **Opcional**. Número da página atual |
+| `per_page`      | `int` | **Opcional**. Quantidade de registros por página |
+
+#### Retorna as Perguntas com suas respectivas Opções de resposta
+
+```http
+  GET /api/poll/questions/{id}
+```
+
+| Params   | Tipo       | Descrição                                   |
+| :---------- | :--------- | :------------------------------------------ |
+| `page`      | `int` | **Opcional**. Número da página atual |
+| `per_page`      | `int` | **Opcional**. Quantidade de registros por página |
+
+#### Persiste o voto nos registros do Drupal
+
+```http
+  POST /api/poll/questions/{id}/vote
+```
+
+| Body   | Tipo       | Descrição                                   |
+| :---------- | :--------- | :------------------------------------------ |
+| `option_id`      | `int` | **Obrigatório**. ID da opção de resposta |
+
+#### Retorna os resultados da votação de uma Pergunta
+
+```http
+  GET /api/poll/questions/{id}/results
+```
+
+| Parms   | Tipo       | Descrição                                   |
+| :---------- | :--------- | :------------------------------------------ |
+| `page`      | `int` | **Opcional**. Número da página atual |
+| `per_page`      | `int` | **Opcional**. Quantidade de registros por página |
+
+#### Faz logout da API + revoga Bearer Token
+
+```http
+  POST /api/logout
+```
+
 
 ## Concorrência e integridade
 - Votos gravados dentro de transação. 
