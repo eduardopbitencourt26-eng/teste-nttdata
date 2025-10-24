@@ -8,13 +8,13 @@ Este projeto entrega um sistema de votação (perguntas/opções, votos únicos 
 
 
 ## Instalação com dump
-1. mkdir sistema-votacao
-2. cd sistema-votacao
-3. git clone https://github.com/eduardopbitencourt26-eng/teste-nttdata.git .
-4. lando start
-5. lando composer install
-6. cp web/sites/default/default.settings.php web/sites/default/settings.php
-7. chmod 644 web/sites/default/settings.php
+1. Crie o diretório: `mkdir sistema-votacao`
+2. Acesse-o: `cd sistema-votacao`
+3. Clone o repo: `git clone https://github.com/eduardopbitencourt26-eng/teste-nttdata.git .`
+4. Inicie o projeto com: `lando start`
+5. Faça a instalação das dependencias e do core do Drupal 10: `lando composer install`
+6. Copie o default settings para o novo settings: `cp web/sites/default/default.settings.php web/sites/default/settings.php`
+7. Dar permissão ao novo settings: `chmod 644 web/sites/default/settings.php`
 8. Gerar um novo base64: `lando drush php-eval "echo \Drupal\Component\Utility\Crypt::randomBytesBase64(55) . PHP_EOL;"` (Copie)
 9. Em `settings.php` procure por `$settings['hash_salt']` e cole o novo hash.
 10. Adicione também ao fim do arquivo `settings.php` a seguinte configuração de database e sync:
@@ -33,8 +33,8 @@ Este projeto entrega um sistema de votação (perguntas/opções, votos únicos 
     );
     $settings['config_sync_directory'] = '../config/sync';
     ```
-11. lando db-import web/modules/custom/poll_system/dump/poll_system_dump.sql
-12. lando drush cr
+11. Faça o import do dump do DB: `lando db-import web/modules/custom/poll_system/dump/poll_system_dump.sql`
+12. Limpe o cache: `lando drush cr`
 13. O módulo poll_system é para ser ativado junto com a importação do database, caso não seja habilitado, ative usando: `lando drush en poll_system -y`.
 14. Conceda Permissões (caso ainda não configurados):
     **Access Poll System API (Read)** => Anonymous User,
